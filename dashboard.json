@@ -1,0 +1,26 @@
+[
+  {
+    "time": "2025-10-27T19:30:00Z",
+    "cmd": "rotate",
+    "mac": "00:11:22:33:44:55"
+  },
+  {
+    "time": "2026-10-27T10:44:54Z",
+    "cmd": "speed_record",
+    "latency_s": 0.588586,
+    "public_ip": "118.103.63.139",
+    "local_ip": "172.29.176.180",
+    "note": "fallback no tsubame-speed binary"
+  },
+  {
+    "time": "2026-10-27T10:53:10Z",
+    "cmd": "mcd_connect",
+    "ssid": "00_MCD-FREE-WIFI",
+    "note": "manual confirm"
+  },
+  {
+    "time": "2026-10-27T10:53:44Z",
+    "cmd": "schedule_rotate",
+    "in_min": 20
+  }
+]
