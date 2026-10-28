@@ -1,1 +1,36 @@
-{"name":"mcp-server-wifi-mac","version":"1.0.0","type":"module","dependencies":{"@modelcontextprotocol/sdk":"^1.0.0","ws":"^8.0.0"},"bin":{"wifi-mac":"./server.js"}}
+{
+  "name": "mcp-server-wifi-mac",
+  "version": "2.1.0",
+  "type": "module",
+  "description": "Wi-Fi MAC rotation: PS1/registry backend, sh frontend, JSONL event DB (planned + actual) with schema, MCP + WS bridge, dashboard",
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "rotate": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/rotate.ps1",
+    "rotate:sh": "bash scripts/rotate.sh",
+    "rotate:noloc": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/rotate.ps1 -NoLocation",
+    "rotate:gps": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/rotate.ps1 -GpsOnly",
+    "rotate:registry": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/rotate.ps1 -NoRestart",
+    "rotate:dry": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/rotate.ps1 -DryRun",
+    "location": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/location.ps1",
+    "dashboard": "node src/dashboard/gen-dashboard.js",
+    "view": "node src/dashboard/gen-dashboard.js && python -m http.server 8080",
+    "schema": "node src/tools/gen-schema.mjs",
+    "validate": "node src/tools/validate-db.mjs data/db.jsonl",
+    "validate:sample": "node src/tools/validate-db.mjs data/sample.db.jsonl",
+    "ws": "node src/bridge/ws.js",
+    "start": "node src/mcp/server.js",
+    "mcp": "node src/mcp/server.js",
+    "task:show": "powershell -NoProfile -Command \"Get-ScheduledTask -TaskName MacSpoofRotate | Get-ScheduledTaskInfo | Format-List\"",
+    "task:delete": "powershell -NoProfile -Command \"Unregister-ScheduledTask -TaskName MacSpoofRotate -Confirm:$false\""
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "ws": "^8.0.0"
+  },
+  "bin": {
+    "wifi-mac": "./src/mcp/server.js"
+  }
+}

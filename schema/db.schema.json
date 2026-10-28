@@ -1,0 +1,522 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/bonsai/mac-address-spoofing-cron/schema/db.schema.json",
+  "title": "mac-spoof db.jsonl record",
+  "description": "data/db.jsonl の1行ぶんのスキーマ。t（または time）が未来なら「予定」、過去なら「実績」として扱う。",
+  "type": "object",
+  "oneOf": [
+    {
+      "description": "MAC を付けかえた実績（成功も失敗も残す）",
+      "type": "object",
+      "required": [
+        "cmd",
+        "mac",
+        "ok"
+      ],
+      "anyOf": [
+        {
+          "required": [
+            "t"
+          ]
+        },
+        {
+          "required": [
+            "time"
+          ]
+        }
+      ],
+      "properties": {
+        "cmd": {
+          "const": "rotate"
+        },
+        "t": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "time": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "mac": {
+          "type": "string",
+          "pattern": "^02([-:][0-9A-Fa-f]{2}){5}$"
+        },
+        "ok": {
+          "type": "boolean"
+        },
+        "adapter": {
+          "type": "string"
+        },
+        "dry_run": {
+          "type": "boolean"
+        },
+        "note": {
+          "type": "string"
+        },
+        "location": {
+          "type": "object",
+          "required": [
+            "source"
+          ],
+          "props": {
+            "source": {
+              "type": "string",
+              "enum": [
+                "gps",
+                "wifi",
+                "cellular",
+                "ip",
+                "windows"
+              ]
+            },
+            "gps": {
+              "type": "boolean"
+            },
+            "lat": {
+              "type": "number"
+            },
+            "lon": {
+              "type": "number"
+            },
+            "accuracy_m": {
+              "type": "number"
+            },
+            "city": {
+              "type": "string"
+            },
+            "region": {
+              "type": "string"
+            },
+            "country": {
+              "type": "string"
+            },
+            "isp": {
+              "type": "string"
+            },
+            "public_ip": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    {
+      "description": "これから実行する予定（t が未来なら予定として扱われる）",
+      "type": "object",
+      "required": [
+        "cmd",
+        "run",
+        "of",
+        "task"
+      ],
+      "anyOf": [
+        {
+          "required": [
+            "t"
+          ]
+        },
+        {
+          "required": [
+            "time"
+          ]
+        }
+      ],
+      "properties": {
+        "cmd": {
+          "const": "rotate_planned"
+        },
+        "t": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "time": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "run": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "of": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "task": {
+          "type": "string"
+        },
+        "scheduled": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "adapter": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "done",
+            "skipped",
+            "failed"
+          ]
+        },
+        "interval_min": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "note": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    {
+      "description": "予約を入れた記録",
+      "type": "object",
+      "required": [
+        "cmd",
+        "in_min"
+      ],
+      "anyOf": [
+        {
+          "required": [
+            "t"
+          ]
+        },
+        {
+          "required": [
+            "time"
+          ]
+        }
+      ],
+      "properties": {
+        "cmd": {
+          "const": "schedule_rotate"
+        },
+        "t": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "time": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "in_min": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "task": {
+          "type": "string"
+        },
+        "at": {
+          "type": "string"
+        },
+        "note": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    {
+      "description": "回線の速さ・遅延の記録",
+      "type": "object",
+      "required": [
+        "cmd"
+      ],
+      "anyOf": [
+        {
+          "required": [
+            "t"
+          ]
+        },
+        {
+          "required": [
+            "time"
+          ]
+        }
+      ],
+      "properties": {
+        "cmd": {
+          "const": "speed_record"
+        },
+        "t": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "time": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "latency_s": {
+          "type": "number",
+          "minimum": 0
+        },
+        "speed_mbps": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "public_ip": {
+          "type": "string"
+        },
+        "local_ip": {
+          "type": "string"
+        },
+        "location": {
+          "type": "object",
+          "required": [
+            "source"
+          ],
+          "props": {
+            "source": {
+              "type": "string",
+              "enum": [
+                "gps",
+                "wifi",
+                "cellular",
+                "ip",
+                "windows"
+              ]
+            },
+            "gps": {
+              "type": "boolean"
+            },
+            "lat": {
+              "type": "number"
+            },
+            "lon": {
+              "type": "number"
+            },
+            "accuracy_m": {
+              "type": "number"
+            },
+            "city": {
+              "type": "string"
+            },
+            "region": {
+              "type": "string"
+            },
+            "country": {
+              "type": "string"
+            },
+            "isp": {
+              "type": "string"
+            },
+            "public_ip": {
+              "type": "string"
+            }
+          }
+        },
+        "note": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    {
+      "description": "Wi-Fi 接続の記録",
+      "type": "object",
+      "required": [
+        "cmd"
+      ],
+      "anyOf": [
+        {
+          "required": [
+            "t"
+          ]
+        },
+        {
+          "required": [
+            "time"
+          ]
+        }
+      ],
+      "properties": {
+        "cmd": {
+          "const": "wifi_record"
+        },
+        "t": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "time": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "additionalProperties": true
+    },
+    {
+      "description": "店舗 Wi-Fi に接続",
+      "type": "object",
+      "required": [
+        "cmd"
+      ],
+      "anyOf": [
+        {
+          "required": [
+            "t"
+          ]
+        },
+        {
+          "required": [
+            "time"
+          ]
+        }
+      ],
+      "properties": {
+        "cmd": {
+          "const": "mcd_connect"
+        },
+        "t": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "time": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "additionalProperties": true
+    },
+    {
+      "description": "SSID 切りかえ",
+      "type": "object",
+      "required": [
+        "cmd"
+      ],
+      "anyOf": [
+        {
+          "required": [
+            "t"
+          ]
+        },
+        {
+          "required": [
+            "time"
+          ]
+        }
+      ],
+      "properties": {
+        "cmd": {
+          "const": "switch_to_TEX"
+        },
+        "t": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "time": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "additionalProperties": true
+    },
+    {
+      "description": "今の MAC を控えただけ",
+      "type": "object",
+      "required": [
+        "cmd"
+      ],
+      "anyOf": [
+        {
+          "required": [
+            "t"
+          ]
+        },
+        {
+          "required": [
+            "time"
+          ]
+        }
+      ],
+      "properties": {
+        "cmd": {
+          "const": "mac_current"
+        },
+        "t": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "time": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "additionalProperties": true
+    },
+    {
+      "description": "手動リフレッシュ",
+      "type": "object",
+      "required": [
+        "cmd"
+      ],
+      "anyOf": [
+        {
+          "required": [
+            "t"
+          ]
+        },
+        {
+          "required": [
+            "time"
+          ]
+        }
+      ],
+      "properties": {
+        "cmd": {
+          "const": "mac_refresh"
+        },
+        "t": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "time": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "additionalProperties": true
+    },
+    {
+      "description": "「そろそろ変える時間」の通知",
+      "type": "object",
+      "required": [
+        "cmd"
+      ],
+      "anyOf": [
+        {
+          "required": [
+            "t"
+          ]
+        },
+        {
+          "required": [
+            "time"
+          ]
+        }
+      ],
+      "properties": {
+        "cmd": {
+          "const": "rotate_alert"
+        },
+        "t": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "time": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "additionalProperties": true
+    }
+  ]
+}

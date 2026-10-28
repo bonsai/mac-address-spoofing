@@ -1,0 +1,15 @@
+# deps
+node_modules/
+package-lock.json
+
+# --- data/ は実データ・生成物なので無視する ---
+data/*
+# 例外: スキーマ確認用のダミーデータだけはコミットする
+!data/sample.db.jsonl
+
+# generated / local artifacts
+*.log
+Thumbs.db
+.DS_Store
+.vscode/
+.idea/

@@ -1,0 +1,10 @@
+{"t":"2026-01-15T09:00:00+09:00","cmd":"rotate","mac":"02-AA-BB-CC-DD-01","ok":true,"adapter":"Wi-Fi","location":{"source":"gps","gps":true,"lat":35.681236,"lon":139.767125,"accuracy_m":5,"city":"Example City","region":"Example Pref","country":"Japan","isp":"Example ISP","public_ip":"203.0.113.10"}}
+{"t":"2026-01-15T09:50:00+09:00","cmd":"rotate","mac":"02-AA-BB-CC-DD-02","ok":true,"adapter":"Wi-Fi","location":{"source":"wifi","gps":false,"lat":35.681301,"lon":139.767208,"accuracy_m":55,"city":"Example City","region":"Example Pref","country":"Japan","isp":"Example ISP","public_ip":"203.0.113.10"}}
+{"t":"2026-01-15T10:40:00+09:00","cmd":"rotate","mac":"02-AA-BB-CC-DD-03","ok":false,"adapter":"Wi-Fi","note":"サンプル: 管理者権限が無くて失敗した例"}
+{"t":"2026-01-15T10:41:00+09:00","cmd":"rotate","mac":"02-AA-BB-CC-DD-04","ok":true,"adapter":"Wi-Fi","dry_run":false}
+{"t":"2026-01-15T19:00:00+09:00","cmd":"schedule_rotate","in_min":50,"task":"MacSpoofRotate","at":"19:50","note":"サンプル"}
+{"t":"2026-01-15T19:50:00+09:00","cmd":"rotate_planned","run":1,"of":3,"task":"MacSpoofRotate","scheduled":"2026-01-15T19:00:00+09:00","adapter":"Wi-Fi","status":"pending","interval_min":50,"note":"サンプル: 未来の予定はダッシュボードで『予定』になる"}
+{"t":"2026-01-15T20:40:00+09:00","cmd":"rotate_planned","run":2,"of":3,"task":"MacSpoofRotate","scheduled":"2026-01-15T19:00:00+09:00","adapter":"Wi-Fi","status":"pending","interval_min":50}
+{"t":"2026-01-15T21:30:00+09:00","cmd":"rotate_planned","run":3,"of":3,"task":"MacSpoofRotate","scheduled":"2026-01-15T19:00:00+09:00","adapter":"Wi-Fi","status":"skipped","interval_min":50,"note":"サンプル: 3回目はスキップした例"}
+{"t":"2026-01-15T19:05:00+09:00","cmd":"speed_record","latency_s":0.1234,"speed_mbps":null,"public_ip":"203.0.113.10","local_ip":"192.0.2.20","note":"サンプル: 回線計測"}
+{"t":"2026-01-15T19:02:00+09:00","cmd":"mcd_connect","ssid":"00_EXAMPLE-FREE-WIFI","note":"サンプル: 店舗Wi-Fiに接続"}
