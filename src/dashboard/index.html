@@ -97,6 +97,28 @@
   .pl   { color: var(--plan); }
   .mute { color: var(--mute); }
 
+  /* ---- 残り時間:  blink（明滅） + grow（拡大）---- */
+  @keyframes blink-grow {
+    0%, 100% { opacity: 1;    transform: scale(1); }
+    50%      { opacity: .30;  transform: scale(1.16); }
+  }
+  .tick {
+    display: inline-block;
+    transform-origin: left center;
+    animation: blink-grow 1.8s ease-in-out infinite;
+    color: var(--plan);
+    font-weight: 700;
+  }
+  /* 直前に迫ったら速く・赤く */
+  .tick.urgent {
+    color: var(--ng);
+    animation-duration: .75s;
+  }
+  /* 「動きを減らす」設定の人には動かさない */
+  @media (prefers-reduced-motion: reduce) {
+    .tick { animation: none; }
+  }
+
   .mac { letter-spacing: .02em; }
   footer { color: var(--mute); font-size: 11px; margin-top: 14px; }
 </style>
@@ -171,7 +193,13 @@ function makeRow(r, isCurrent) {
   const st = el("td");
   if (r.state === "ok") st.append(el("span", "ok", "✔ ok"));
   else if (r.state === "fail") st.append(el("span", "ng", "✘ fail"));
-  else if (r.state === "planned") st.append(el("span", "pl", `予定 ${fmtIn(r.in_min)}`.trim()));
+  else if (r.state === "planned") {
+    st.append(el("span", "pl", "予定 "));
+    const tick = el("span", "tick" + (r.in_min != null && r.in_min <= 5 ? " urgent" : ""), fmtIn(r.in_min));
+    tick.title = "残り時間";
+    st.append(tick);
+    st.append(el("span", "pl", ` / ${r.of ? r.run + "/" + r.of : ""}`.trimEnd()));
+  }
   else if (r.state === "due") st.append(el("span", "pl", "予定(時刻超過)"));
   else st.append(el("span", "mute", "—"));
   tr.append(st);
@@ -204,7 +232,8 @@ function render(d) {
     card("ok / fail", `${d.stats.ok} / ${d.stats.failed}`),
     card("予定", d.stats.planned, "pl"),
     card("次回", d.stats.next_at ? fmtTime(d.stats.next_at).slice(11, 16) : "—", "pl"),
-    card("残り", fmtIn(d.stats.next_in_min) || "—", "pl"),
+    card("残り", fmtIn(d.stats.next_in_min) || "—", "pl tick" +
+      (d.stats.next_in_min != null && d.stats.next_in_min <= 5 ? " urgent" : "")),
   );
 
   const tbody = document.getElementById("rows");
@@ -255,7 +284,7 @@ function render(d) {
   }
 }
 
-fetch("../../data/dashboard.json?_=" + Date.now())
+fetch("/data/dashboard.json?_=" + Date.now())
   .then((r) => r.json())
   .then(render)
   .catch((e) => { document.getElementById("sub").textContent = "error: " + e.message; });

@@ -257,7 +257,7 @@ mac-spoof/
     ├── bridge/ws.js          ← WebSocket の橋わたし (ws://localhost:8765)
     └── dashboard/
         ├── gen-dashboard.js  ← db.jsonl → dashboard.json に集計
-        └── dashboard.html    ← 画面（60秒ごとに自動更新）
+        └── index.html        ← 画面（60秒ごとに自動更新）
 ```
 
 ### なぜ分けているの？
@@ -380,8 +380,44 @@ npm run rotate:dry        # 練習（何も変えない）
 npm run rotate:registry   # 設定だけ書く
 npm run validate          # 記録がスキーマに合っているか確かめる
 npm run dashboard         # dashboard.json を作り直す
-npm run serve             # 配信するだけ（http://127.0.0.1:8080/ ）
+npm run serve             # 配信するだけ（→ http://127.0.0.1:8080/ ）
 npm run view              # 作ってから、ブラウザを開いて配信
+```
+
+### 開く URL は `http://127.0.0.1:8080/` だけ
+
+`/` に来たら **自動でダッシュボード**（`src/dashboard/index.html`）を返します。
+長いパスを覚える必要はありません。
+
+| URL | 出るもの |
+|---|---|
+| `/` | ダッシュボード（いちばん短い） |
+| `/d` `/dash` | 同じもの（打ちやすい別名） |
+| `/data/dashboard.json` | 元データ（JSON） |
+
+`npm run serve` の表示:
+
+```
+dashboard: http://127.0.0.1:8080/   ← これだけ覚えればOK
+(短縮: /d でも同じ / Ctrl+C で停止 / root: C:\Users\dance\mac-spoof)
+```
+
+### 残り時間は点滅して大きくなる
+
+次回の予定までの **残り時間** は、見落とさないようにアニメーションします。
+
+| 状態 | 見た目 |
+|---|---|
+| ふだん | オレンジで **点滅 + 拡大**（1.8秒周期） |
+| 残り5分以内 | **赤く** なって速く点滅（0.75秒周期） |
+| 一覧の「予定 あと24分」 | 同じアニメーション |
+| OS で「視差効果を減らす」設定 | 動かない（`prefers-reduced-motion` に対応） |
+
+```css
+@keyframes blink-grow {
+  0%, 100% { opacity: 1;   transform: scale(1); }
+  50%      { opacity: .30; transform: scale(1.16); }
+}
 ```
 
 > ⚠️ **PowerShell 5.1 では `&&` が使えません。**
@@ -434,7 +470,7 @@ Unregister-ScheduledTask -TaskName MacSpoofRotate -Confirm:$false
 - `t` が **過去** → 実績
 
 `gen-dashboard.js` がこの1本のファイルを **時刻の昇順で1本のリスト** にします。
-`dashboard.html` はそれを **1つの表** にそのまま並べます。
+`src/dashboard/index.html` はそれを **1つの表** にそのまま並べます。
 
 ```
 時刻                  cmd               MAC                 状態        場所 / 補足

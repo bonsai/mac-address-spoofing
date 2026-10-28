@@ -32,8 +32,12 @@ const server = createServer(async (req, res) => {
     const url = new URL(req.url, "http://127.0.0.1");
     let pathname = decodeURIComponent(url.pathname);
 
-    // ルートに来たらダッシュボードへ
-    if (pathname === "/" || pathname === "") pathname = "/src/dashboard/dashboard.html";
+    // 短い URL でダッシュボードを開けるようにする
+    //   /           → /src/dashboard/index.html
+    //   /d  /dash   → 同上
+    if (pathname === "/" || pathname === "" || pathname === "/d" || pathname === "/dash") {
+      pathname = "/src/dashboard/index.html";
+    }
 
     // ディレクトリトラバーサル防止
     const target = normalize(join(root, pathname));
@@ -63,8 +67,8 @@ const server = createServer(async (req, res) => {
 
 server.listen(portArg, "127.0.0.1", () => {
   const url = `http://127.0.0.1:${portArg}/`;
-  console.log(`dashboard: ${url}`);
-  console.log(`(Ctrl+C で停止 / root: ${root})`);
+  console.log(`dashboard: ${url}   ← これだけ覚えればOK`);
+  console.log(`(短縮: /d でも同じ / Ctrl+C で停止 / root: ${root})`);
   if (open) {
     const cmd =
       process.platform === "win32" ? `start "" "${url}"` :
