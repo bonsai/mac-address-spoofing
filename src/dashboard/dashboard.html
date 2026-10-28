@@ -4,55 +4,148 @@
 <title>WiFi MAC Dashboard</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
-  :root { color-scheme: dark; }
-  body { font: 14px/1.5 ui-monospace, "Cascadia Code", Consolas, monospace;
-         background: #0d1117; color: #c9d1d9; margin: 0; padding: 24px; }
-  h1 { font-size: 18px; margin: 0 0 4px; }
-  .sub { color: #8b949e; margin-bottom: 20px; }
-  h2 { font-size: 14px; text-transform: uppercase; letter-spacing: .08em;
-       color: #8b949e; border-bottom: 1px solid #21262d; padding-bottom: 6px; margin: 24px 0 10px; }
-  .cards { display: flex; gap: 12px; flex-wrap: wrap; }
-  .card { background: #161b22; border: 1px solid #21262d; border-radius: 8px;
-          padding: 10px 14px; min-width: 120px; }
-  .card .k { color: #8b949e; font-size: 11px; text-transform: uppercase; }
-  .card .v { font-size: 18px; }
-  table { border-collapse: collapse; width: 100%; }
-  th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid #21262d; white-space: nowrap; }
-  th { color: #8b949e; font-size: 11px; text-transform: uppercase; }
-  tr.upcoming td { color: #d29922; }
-  tr.due td { color: #f85149; }
-  .ok { color: #3fb950; } .ng { color: #f85149; } .mute { color: #8b949e; }
-  .pill { border: 1px solid currentColor; border-radius: 99px; padding: 0 8px; font-size: 11px; }
+  :root {
+    color-scheme: dark;
+    --bg: #0d1117;
+    --panel: #161b22;
+    --line: #21262d;
+    --fg: #c9d1d9;
+    --mute: #8b949e;
+    --ok: #3fb950;
+    --ng: #f85149;
+    --plan: #d29922;
+    --mono: ui-monospace, "Cascadia Mono", "Cascadia Code", Consolas, "SF Mono",
+            Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+
+  body {
+    font: 13px/1.5 var(--mono);
+    font-variant-numeric: tabular-nums;
+    background: var(--bg);
+    color: var(--fg);
+    margin: 0;
+    padding: 20px 24px 48px;
+  }
+
+  h1 { font-size: 16px; margin: 0; letter-spacing: .02em; }
+  .sub { color: var(--mute); margin: 2px 0 18px; font-size: 12px; }
+
+  /* ---- 上段の数字 ---- */
+  .cards { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 8px 12px;
+    min-width: 104px;
+  }
+  .card .k { color: var(--mute); font-size: 10px; text-transform: uppercase; letter-spacing: .08em; }
+  .card .v { font-size: 17px; line-height: 1.25; }
+
+  /* ---- 1本の表 ---- */
+  .wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 6px; }
+  table { border-collapse: collapse; width: 100%; min-width: 860px; table-layout: fixed; }
+
+  col.c-time { width: 158px; }
+  col.c-cmd  { width: 132px; }
+  col.c-mac  { width: 152px; }
+  col.c-st   { width: 104px; }
+  col.c-rest { width: auto; }
+
+  thead th {
+    position: sticky; top: 0; z-index: 1;
+    background: #11161d;
+    color: var(--mute);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    text-align: left;
+    padding: 7px 10px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  tbody td {
+    padding: 5px 10px;
+    border-bottom: 1px solid var(--line);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  tbody tr:last-child td { border-bottom: 0; }
+  tbody tr:hover td { background: #1a2029; }
+
+  /* 予定 = 未来。色だけ違う。表は同じ。 */
+  tbody tr.future td { color: var(--plan); }
+  tbody tr.future:hover td { background: #221d10; }
+  tbody tr.current td { box-shadow: inset 3px 0 0 var(--ok); }
+  tbody tr.nowline td {
+    color: var(--mute);
+    font-size: 10px;
+    letter-spacing: .12em;
+    padding: 3px 10px;
+    background: #0b0f14;
+    border-top: 1px dashed var(--mute);
+    border-bottom: 1px dashed var(--mute);
+  }
+  tbody tr.nowline:hover td { background: #0b0f14; }
+
+  .ok   { color: var(--ok); }
+  .ng   { color: var(--ng); }
+  .pl   { color: var(--plan); }
+  .mute { color: var(--mute); }
+
+  .mac { letter-spacing: .02em; }
+  footer { color: var(--mute); font-size: 11px; margin-top: 14px; }
 </style>
 
 <h1>WiFi MAC Dashboard</h1>
 <div class="sub" id="sub">loading…</div>
 
-<h2>Status</h2>
 <div class="cards" id="cards"></div>
 
-<h2>予定 (future, 同一管理)</h2>
-<table id="plan"><thead>
-  <tr><th>#</th><th>実行予定</th><th>まで</th><th>task</th><th>state</th></tr>
-</thead><tbody></tbody></table>
+<div class="wrap">
+  <table>
+    <colgroup>
+      <col class="c-time"><col class="c-cmd"><col class="c-mac"><col class="c-st"><col class="c-rest">
+    </colgroup>
+    <thead>
+      <tr>
+        <th>時刻</th><th>cmd</th><th>MAC</th><th>状態</th><th>場所 / 補足</th>
+      </tr>
+    </thead>
+    <tbody id="rows"></tbody>
+  </table>
+</div>
 
-<h2>実績 (recent)</h2>
-<table id="done"><thead>
-  <tr><th>時刻</th><th>cmd</th><th>mac</th><th>ok</th><th>note</th></tr>
-</thead><tbody></tbody></table>
+<footer id="foot"></footer>
 
 <script>
-const fmt = (s) => {
-  if (!s) return "—";
-  const d = new Date(s);
-  if (isNaN(d)) return String(s);
-  return d.toLocaleString("ja-JP", { timeZone: "Asia/Tokyo", hour12: false });
-};
 const el = (tag, cls, txt) => {
   const n = document.createElement(tag);
   if (cls) n.className = cls;
   if (txt != null) n.textContent = txt;
   return n;
+};
+
+/** 2026-10-28 20:43 の形にそろえる（等幅で桁が揃う） */
+const fmtTime = (s) => {
+  if (!s) return "—";
+  const d = new Date(s);
+  if (Number.isNaN(d.getTime())) return String(s);
+  const p = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ` +
+         `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+};
+
+const fmtIn = (min) => {
+  if (min == null) return "";
+  if (min <= 0) return "まもなく";
+  if (min < 60) return `あと${min}分`;
+  const h = Math.floor(min / 60), m = min % 60;
+  return m ? `あと${h}時間${m}分` : `あと${h}時間`;
 };
 
 function card(k, v, cls) {
@@ -61,53 +154,104 @@ function card(k, v, cls) {
   return c;
 }
 
+/** 1行 = どのレコードも同じ形（予定も実績も同じ列に置く） */
+function makeRow(r, isCurrent) {
+  const tr = el("tr", `${r.future ? "future" : ""} ${isCurrent ? "current" : ""}`.trim());
+
+  // 時刻
+  tr.append(el("td", null, fmtTime(r.time)));
+
+  // cmd
+  tr.append(el("td", null, r.cmd ?? "—"));
+
+  // MAC
+  tr.append(el("td", "mac", r.mac ?? "—"));
+
+  // 状態（ok / fail / 予定 — 同じ列に入れる）
+  const st = el("td");
+  if (r.state === "ok") st.append(el("span", "ok", "✔ ok"));
+  else if (r.state === "fail") st.append(el("span", "ng", "✘ fail"));
+  else if (r.state === "planned") st.append(el("span", "pl", `予定 ${fmtIn(r.in_min)}`.trim()));
+  else if (r.state === "due") st.append(el("span", "pl", "予定(時刻超過)"));
+  else st.append(el("span", "mute", "—"));
+  tr.append(st);
+
+  // 場所 / 補足（1列にまとめる）
+  const where = [];
+  if (r.location) {
+    const l = r.location;
+    const src = l.gps ? "GPS" : (l.source ?? "");
+    const head = l.city || l.region || l.country || "";
+    const acc = l.accuracy_m != null ? `±${l.accuracy_m}m` : "";
+    where.push([head, src ? `(${src})` : "", acc].filter(Boolean).join(" "));
+  }
+  if (r.adapter && r.adapter !== "Wi-Fi") where.push(r.adapter);
+  if (r.dry_run) where.push("dry-run");
+  if (r.note) where.push(r.note);
+  const rest = el("td", "mute", where.filter(Boolean).join(" ・ "));
+  rest.title = rest.textContent;
+  tr.append(rest);
+
+  return tr;
+}
+
 function render(d) {
   document.getElementById("sub").textContent =
-    `now ${d.now_local} ・ generated ${fmt(d.generated_at)}`;
+    `now ${d.now_local} ・ generated ${fmtTime(d.generated_at)} ・ ${d.stats.total} records`;
 
-  const cards = document.getElementById("cards");
-  cards.replaceChildren(
+  document.getElementById("cards").replaceChildren(
     card("current mac", d.current_mac?.mac ?? "?", "ok"),
-    card("rotations ok", d.stats.rotations_ok, "ok"),
-    card("failed", d.stats.rotations_failed, "ng"),
-    card("planned", d.stats.planned, "mute"),
-    card("records", d.stats.total_records),
+    card("ok / fail", `${d.stats.ok} / ${d.stats.failed}`),
+    card("予定", d.stats.planned, "pl"),
+    card("次回", d.stats.next_at ? fmtTime(d.stats.next_at).slice(11, 16) : "—", "pl"),
+    card("残り", fmtIn(d.stats.next_in_min) || "—", "pl"),
   );
 
-  const plan = document.querySelector("#plan tbody");
-  plan.replaceChildren();
-  if (!d.planned.length) {
-    const tr = el("tr"); const td = el("td", "mute", "予定なし");
-    td.colSpan = 5; tr.append(td); plan.append(tr);
-  }
-  for (const p of d.planned) {
-    const tr = el("tr", p.state);
-    tr.append(
-      el("td", null, `${p.run ?? "-"}/${p.of ?? "-"}`),
-      el("td", null, fmt(p.t)),
-      el("td", null, p.in_min > 0 ? `${p.in_min} min` : "まもなく"),
-      el("td", null, p.task ?? "—"),
-      el("td", null, p.state),
-    );
-    plan.append(tr);
+  const tbody = document.getElementById("rows");
+  tbody.replaceChildren();
+
+  if (!d.records.length) {
+    const tr = el("tr");
+    const td = el("td", "mute", "記録がありません");
+    td.colSpan = 5;
+    tr.append(td);
+    tbody.append(tr);
+    return;
   }
 
-  const done = document.querySelector("#done tbody");
-  done.replaceChildren();
-  for (const r of d.recent) {
-    const tr = el("tr");
-    const okTd = el("td");
-    if (r.ok === true) okTd.append(el("span", "ok", "✔ ok"));
-    else if (r.ok === false) okTd.append(el("span", "ng", "✘ fail"));
-    else okTd.append(el("span", "mute", "—"));
-    tr.append(
-      el("td", null, fmt(r.t ?? r.time)),
-      el("td", null, r.cmd ?? "—"),
-      el("td", null, r.mac ?? "—"),
-      okTd,
-      el("td", "mute", r.note ?? ""),
-    );
-    done.append(tr);
+  const currentMac = d.current_mac?.mac;
+  let insertedNow = false;
+
+  for (const r of d.records) {
+    // 「いま」の線を、過去と未来の境目に1回だけ差し込む
+    if (r.future && !insertedNow) {
+      const tr = el("tr", "nowline");
+      const td = el("td", null, `──── いま ${d.now_local.slice(-8)} ──────────────────────────────`);
+      td.colSpan = 5;
+      tr.append(td);
+      tbody.append(tr);
+      insertedNow = true;
+    }
+    tbody.append(makeRow(r, r.mac && r.mac === currentMac && !r.future));
+  }
+
+  if (!insertedNow) {
+    const tr = el("tr", "nowline");
+    const td = el("td", null, `──── いま ${d.now_local.slice(-8)} （予定なし）`);
+    td.colSpan = 5;
+    tr.append(td);
+    tbody.append(tr);
+  }
+
+  document.getElementById("foot").textContent =
+    "予定も実績も同じ表・同じ列。色が違うのは「時刻が未来かどうか」だけです。 60秒ごとに自動更新。";
+
+  // 未来が多すぎるときは「いま」の行が見える位置までスクロール
+  const nowline = tbody.querySelector(".nowline");
+  if (nowline && !window.__scrolled) {
+    window.__scrolled = true;
+    nowline.scrollIntoView({ block: "center" });
+    window.scrollBy(0, -80);
   }
 }
 
@@ -116,7 +260,6 @@ fetch("../../data/dashboard.json?_=" + Date.now())
   .then(render)
   .catch((e) => { document.getElementById("sub").textContent = "error: " + e.message; });
 
-// 60s auto refresh
 setInterval(() => location.reload(), 60000);
 </script>
 </html>
