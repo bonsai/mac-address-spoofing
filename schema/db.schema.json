@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://github.com/bonsai/mac-address-spoofing-cron/schema/db.schema.json",
+  "$id": "https://github.com/bonsai/mac-address-spoofing/schema/db.schema.json",
   "title": "mac-spoof db.jsonl record",
   "description": "data/db.jsonl の1行ぶんのスキーマ。t（または time）が未来なら「予定」、過去なら「実績」として扱う。",
   "type": "object",
