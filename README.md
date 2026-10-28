@@ -289,7 +289,7 @@ mac-spoof/
 ### 準備
 
 - Windows の **管理者として実行** した PowerShell が必要です（設定置き場を書き換えるため）
-- Node.js が入っていると、ダッシュボードが使えます
+- Node.js が入っていると、ダッシュボードが使えます（**python は不要**にしました）
 
 ### ふつうに付けかえる
 
@@ -355,8 +355,23 @@ npm run rotate:dry        # 練習（何も変えない）
 npm run rotate:registry   # 設定だけ書く
 npm run validate          # 記録がスキーマに合っているか確かめる
 npm run dashboard         # dashboard.json を作り直す
-npm run view              # 作ってから http://localhost:8080/src/dashboard/dashboard.html を開く
+npm run serve             # 配信するだけ（http://127.0.0.1:8080/ ）
+npm run view              # 作ってから、ブラウザを開いて配信
 ```
+
+> ⚠️ **PowerShell 5.1 では `&&` が使えません。**
+> `npm run dashboard && npm run view` はこのエラーになります。
+>
+> ```
+> The token '&&' is not a valid statement separator in this version.
+> ```
+>
+> 代わりに **`npm run view` 1つ** で両方やってくれます（中で順番に実行しています）。
+> 自分で繋ぐときは `;` を使うか、2行に分けてください。
+>
+> ```powershell
+> npm run dashboard; npm run view     # ← ; なら OK
+> ```
 
 ### 予定を入れる（50分ごと・3回だけ）
 
